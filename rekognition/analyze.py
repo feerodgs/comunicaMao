@@ -63,11 +63,11 @@ def show_custom_labels(model, image, min_confidence):
 
 def main():
     # Load the image from the root of the project
-    photo_path = r"C:\Users\Usuário\Desktop\comunicaMao\rekognition\imagens\nao.jpg"
+    photo_path = r"C:\Users\Usuário\Desktop\comunicaMao\rekognition\imagens\a2.jpg"
     image = Image.open(photo_path)
     
-    model = 'arn:aws:rekognition:us-east-1:256433828779:project/libras-rekognition/version/libras-rekognition.2024-11-04T22.06.30/1730768791315'
-    min_confidence = 30
+    model = 'arn:aws:rekognition:us-east-1:256433828779:project/libras-rekognition/version/libras-rekognition.2024-11-05T00.57.42/1730779063889'
+    min_confidence = 1
 
 
     label_count = show_custom_labels(model, image, min_confidence)
