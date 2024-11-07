@@ -20,9 +20,9 @@ try {
     $newPost = $database
         ->getReference('conversas')
         ->push([
-            'mensagem' => 'salpicao',
-            'destinatario' => 1,
-            'remetente' => 2,
+            'mensagem' => 'sapiquinha',
+            'destinatario' => 5,
+            'remetente' => 4,
             'horario' => time()
         ]);
 

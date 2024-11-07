@@ -22,12 +22,7 @@ $referencePath = 'conversas';
 
 // Variável para armazenar o último timestamp processado
 $lastTimestamp = 0;
-
-
-
-echo "Iniciando listener...\n";
-
-while (true) {
+if ($_POST['acao'] == "atender") {
     try {
         // Buscar registros com timestamp maior que o último processado
         $newRecordsSnapshot = $database
@@ -48,7 +43,7 @@ while (true) {
                     }
 
                     // Processar o novo registro
-                    echo "Novo registro encontrado: ID={$key}, Destinatario={$record['destinatario']}, Remetente={$record['remetente']}, Mensagem={$record['mensagem']}, Timestamp={$record['horario']}\n";
+                    echo "key={$key}&Destinatario={$record['destinatario']}&Remetente={$record['remetente']}&Mensagem={$record['mensagem']}&Timestamp={$record['horario']}";
                     // exit();
                     // Aqui você pode adicionar a lógica para processar o registro, como enviar e-mails, atualizar outros sistemas, etc.
                 }
@@ -62,7 +57,4 @@ while (true) {
         // Opcional: Esperar antes de tentar novamente em caso de erro
         sleep(10);
     }
-
-    ob_flush();
-    flush();
 }
