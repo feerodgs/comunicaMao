@@ -28,9 +28,9 @@ def start_model(project_arn, model_arn, version_name, min_inference_units):
     
 def main():
     project_arn='arn:aws:rekognition:us-east-1:256433828779:project/libras-rekognition/1730509009385'
-    model_arn='arn:aws:rekognition:us-east-1:256433828779:project/libras-rekognition/version/libras-rekognition.2024-11-04T22.06.30/1730768791315'
+    model_arn='arn:aws:rekognition:us-east-1:256433828779:project/libras-rekognition/version/libras-rekognition.2024-11-05T00.57.42/1730779063889'
     min_inference_units=1 
-    version_name='libras-rekognition.2024-11-04T22.06.30'
+    version_name='libras-rekognition.2024-11-05T00.57.42'
     start_model(project_arn, model_arn, version_name, min_inference_units)
 
 if __name__ == "__main__":

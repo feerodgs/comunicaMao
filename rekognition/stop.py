@@ -23,7 +23,7 @@ def stop_model(model_arn):
     
 def main():
     
-    model_arn='arn:aws:rekognition:us-east-1:256433828779:project/libras-rekognition/version/libras-rekognition.2024-11-04T22.06.30/1730768791315'
+    model_arn='arn:aws:rekognition:us-east-1:256433828779:project/libras-rekognition/version/libras-rekognition.2024-11-05T00.57.42/1730779063889'
     stop_model(model_arn)
 
 if __name__ == "__main__":
