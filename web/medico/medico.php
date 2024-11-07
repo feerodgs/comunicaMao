@@ -10,28 +10,58 @@ include "../includes/cabecalho.php";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comunicamão</title>
+
     <style>
-        #chat2 .form-control {
-            border-color: transparent;
+        .chat-box {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            height: 70vh;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        #chat2 .form-control:focus {
-            border-color: transparent;
-            box-shadow: inset 0px 0px 0px 1px transparent;
-        }
-
-        .divider:after,
-        .divider:before {
-            content: "";
+        .chat-messages {
             flex: 1;
-            height: 1px;
-            background: #eee;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .message-left {
+            text-align: left;
+            background-color: #e9ecef;
+            margin-right: auto;
+        }
+
+        .message-right {
+            text-align: right;
+            background-color: #007bff;
+            color: #ffffff;
+            margin-left: auto;
+        }
+
+        .chat-footer {
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <?php /*  <div class="container">
         <div class="row">
             <div class="col-md-2">
                 <div class="card mt-3">
@@ -50,80 +80,137 @@ include "../includes/cabecalho.php";
                     </div>
 
                     <div class="card-body">
-                            <form name="dialogo" id="dialogo">
+                        <form name="dialogo" id="dialogo">
                             <textarea name="conversa" id="conversa" cols="30" rows="10" class="form-control"></textarea>
                             <input type="hidden" name="atendimento" id="atendimento" value="<?php print $_POST['numAtendimento']; ?>">
                             <input type="hidden" name="medico" id="medico" value="<?php print $_SESSION['id_usuario']; ?>">
-                            </form>
-                            <div class="row mt-3">
-                                <div class="col-md-12 text-end"><button type="button" name="encerrar" class="btn btn-danger" onclick="encerrar()">Encerrar atendimento</button></div>
-                            </div>
+                        </form>
+                        <div class="row mt-3">
+                            <div class="col-md-12 text-end"><button type="button" name="encerrar" class="btn btn-danger" onclick="encerrar()">Encerrar atendimento</button></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div> */ ?>
 
-        <form name="encerrado" id="encerrado" method="POST" action="index.php">
-            <input type="hidden" name="mensagem" id="mensagem" value="Atendimento Encerrado com Sucesso">
-        </form>
+    <div class="container">
+        <div class="chat-box">
+           
+            <div class="chat-messages">
+                
+            </div>
+
+           
+            <div class="chat-footer">
+                <input type="text" class="form-control" id="messageInput" placeholder="Digite sua mensagem">
+                <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </div>
 
 
 
-        <script>
-            function envia() {
-                var conteudo = $('#conversa').val();
-                var acao = "atender";
-                var atendimento = $('#atendimento').val();
-                var atendimento = $('#atendimento').val();
-                $.ajax({
-                    type: "POST",
-                    url: "../listener.php",
-                    data: 'acao=' + acao +
-                        '&medico' + medico,
-                    dataType: "html",
-                    success: function(response) {
-                        var resposta = response.split("&");
+    <form name="encerrado" id="encerrado" method="POST" action="index.php">
+        <input type="hidden" name="mensagem" id="mensagem" value="Atendimento Encerrado com Sucesso">
+    </form>
 
-                        if (resposta[1] == "<?php print "Destinatario={$_SESSION['id_usuario']}"; ?>") {
+    <form name="dados" id="dados">
+        <input type="hidden" name="medico" id="medico" value="<?php print $_SESSION['id_usuario'] ?>">
+    </form>
 
-                            $("#conversa").val(resposta[7] + "\n" + resposta[3]);
 
-                        }
+    <script>
+        function buscar() {
+            
+            var acao = "atender";
+            var medico = $('#medico').val();
 
-                        console.log(resposta);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Erro:', error);
-                        Swal.fire("", "Ops! Algo deu errado no processo.", "error");
+            $.ajax({
+                type: "POST",
+                url: "../listener.php",
+                data: 'acao=' + acao +
+                    '&medico=' + medico,
+                dataType: "html",
+                success: function(response) {
+
+                    var resposta = response.split("&");
+                    
+                    const mensagem = resposta[3];
+                    const horario = resposta[4];
+
+                    const messageText = mensagem.replace("Mensagem=","");
+                    const messageHorario = horario.replace("Timestamp=", "");
+
+                    if (messageText) {
+                        const chatMessages = document.querySelector('.chat-messages');
+                        const messageElement = document.createElement('div');
+                        messageElement.classList.add('message', 'message-left');
+
+                        messageElement.innerHTML = `
+                <span class="username">Paciente:</span>
+                <p class="text mb-0">${messageText}</p>
+                <p class="fst-italic" style="font-size: 0.8rem">${messageHorario}</p>
+            `;
+
+                        chatMessages.appendChild(messageElement);
+                        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll para a última mensagem
+                        messageInput.value = '';
                     }
-                });
-            }
 
-            envia();
-            setInterval(envia, 5000);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro:', error);
+                    Swal.fire("", "Ops! Algo deu errado no processo.", "error");
+                }
+            });
+        }
 
-            function encerrar() {
-                var acao = "encerrar";
-                var atendimento = $('#atendimento').val();
-                $.ajax({
-                    type: "POST",
-                    url: "acoes.php",
-                    data: 'atendimento=' + atendimento +
-                        '&acao=' + acao,
-                    dataType: "html",
-                    success: function(response) {
-                        if (response == 'encerrado') {
-                            document.encerrado.submit();
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Erro:', error);
-                        Swal.fire("", "Ops! Algo deu errado no processo.", "error");
+        buscar();
+        setInterval(buscar, 5000);
+
+        function encerrar() {
+            var acao = "encerrar";
+            var atendimento = $('#atendimento').val();
+            $.ajax({
+                type: "POST",
+                url: "acoes.php",
+                data: 'atendimento=' + atendimento +
+                    '&acao=' + acao,
+                dataType: "html",
+                success: function(response) {
+                    if (response == 'encerrado') {
+                        document.encerrado.submit();
                     }
-                });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro:', error);
+                    Swal.fire("", "Ops! Algo deu errado no processo.", "error");
+                }
+            });
+        }
+
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value.trim();
+
+            if (messageText) {
+                const chatMessages = document.querySelector('.chat-messages');
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'message-right');
+
+                messageElement.innerHTML = `
+                <span class="username">Você:</span>
+                <p class="text">${messageText}</p>
+            `;
+
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll para a última mensagem
+                messageInput.value = '';
             }
-        </script>
+        }
+    </script>
 
 </body>
 
