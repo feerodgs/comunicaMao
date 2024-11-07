@@ -22,7 +22,7 @@ try {
         ->push([
             'mensagem' => 'sapiquinha',
             'destinatario' => 5,
-            'remetente' => 4,
+            'remetente' => 1,
             'horario' => time()
         ]);
 

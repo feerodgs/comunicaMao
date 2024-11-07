@@ -3,12 +3,14 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+
+
 require 'vendor/autoload.php';
 
 use Kreait\Firebase\Factory;
 
 set_time_limit(0); // Impede que o script expire
-
+$destinatario = $_POST['medico'];
 // Inicializar a fábrica do Firebase
 $firebase = (new Factory)
     ->withServiceAccount(__DIR__ . "/db/firebase-credentials.json")
@@ -40,12 +42,14 @@ if ($_POST['acao'] == "atender") {
                     // Atualizar o último timestamp processado
                     if ($record['horario'] > $lastTimestamp) {
                         $lastTimestamp = $record['horario'];
+                        $dataFormatada = date("d/m/Y H:i:s", $lastTimestamp);
                     }
-
-                    // Processar o novo registro
-                    echo "key={$key}&Destinatario={$record['destinatario']}&Remetente={$record['remetente']}&Mensagem={$record['mensagem']}&Timestamp={$record['horario']}";
-                    // exit();
-                    // Aqui você pode adicionar a lógica para processar o registro, como enviar e-mails, atualizar outros sistemas, etc.
+                    if ($destinatario == $record['destinatario']) {
+                        // Processar o novo registro
+                        echo "key={$key}&Destinatario={$record['destinatario']}&Remetente={$record['remetente']}&Mensagem={$record['mensagem']}&Timestamp={$dataFormatada}&";
+                        // exit();
+                        // Aqui você pode adicionar a lógica para processar o registro, como enviar e-mails, atualizar outros sistemas, etc.
+                    }
                 }
             }
         }
