@@ -15,18 +15,15 @@ ini_set("display_errors", 0);
     <title>Comunicamão</title>
     <style>
         .gradient-custom {
-
-            background: #6a11cb;
-
-            background: -webkit-linear-gradient(to bottom, #ff930fb8, #ffe1b3);
-
             background: linear-gradient(to bottom, #ff930fb8, #ffe1b3);
+
         }
     </style>
 </head>
 
 <body>
-    <section class="vh-100 gradient-custom">
+    <div class="gradient-custom position-fixed w-100 h-100"></div>
+    <section class="vh-100 w-100">
         <div class="container py-5 h-100">
             <div class="row d-flex justify-content-center align-items-center h-100">
                 <div class="col-12 col-md-8 col-lg-6 col-xl-5">
