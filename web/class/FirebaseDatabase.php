@@ -1,6 +1,6 @@
 <?php
 
-require '../vendor/autoload.php';
+require 'vendor/autoload.php';
 
 use Kreait\Firebase\Factory;
 
@@ -40,18 +40,19 @@ class FirebaseDatabase
         return $this->database->getReference($path)->getValue();
     }
 
-    // Novo método para buscar registros com filtros (ex: remetente ou destinatario)
+    // Novo mï¿½todo para buscar registros com filtros (ex: remetente ou destinatario)
     public function selectWithFilter($path, $field, $value)
     {
         $results = $this->database->getReference($path)
             ->orderByChild($field)
-            ->equalTo($value)
+
+            ->equalTo($value, $field)
             ->getValue();
 
         return $results;
     }
 
-    // Método para buscar registros com remetente ou destinatario igual ao valor
+    // Mï¿½todo para buscar registros com remetente ou destinatario igual ao valor
     public function selectByRemetenteOuDestinatario($path, $userId)
     {
         $remetenteResults = $this->database->getReference($path)
@@ -70,7 +71,7 @@ class FirebaseDatabase
         return $allResults;
     }
 
-    // Novo método para atualizar registros com base em um filtro (campo e valor)
+    // Novo mï¿½todo para atualizar registros com base em um filtro (campo e valor)
     public function updateWithFilter($path, $field, $value, $data)
     {
         $results = $this->database->getReference($path)
@@ -87,10 +88,10 @@ class FirebaseDatabase
             return true;
         }
 
-        return false; // Caso não tenha encontrado nenhum registro
+        return false; // Caso nï¿½o tenha encontrado nenhum registro
     }
 
-    // Novo método para excluir registros com base em um filtro (campo e valor)
+    // Novo mï¿½todo para excluir registros com base em um filtro (campo e valor)
     public function deleteWithFilter($path, $field, $value)
     {
         $results = $this->database->getReference($path)
@@ -107,17 +108,15 @@ class FirebaseDatabase
             return true;
         }
 
-        return false; // Caso não tenha encontrado nenhum registro
+        return false; // Caso nï¿½o tenha encontrado nenhum registro
     }
 }
-
-// Exemplo de uso:
 // try {
-    // Inicialize a conexão com o Firebase
-    // $firebase = new FirebaseDatabase(
-    //     "../db/firebase-credentials.json",
-    //     "https://comunicamao-a541b-default-rtdb.firebaseio.com/"
-    // );
+
+//     $firebase = new FirebaseDatabase(
+//         "../db/firebase-credentials.json",
+//         "https://comunicamao-a541b-default-rtdb.firebaseio.com/"
+//     );
 
     /*
     *
@@ -138,7 +137,7 @@ class FirebaseDatabase
     * Selecionando dados onde remetente = 1
     *
     */
-    // $dadosRemetente = $firebase->selectWithFilter("conversas", "remetente", 1);
+    // $dadosRemetente = $firebase->selectWithFilter("conversas", "destinatario", 1);
     // echo "Registros com remetente 1:\n";
     // print_r($dadosRemetente);
 
@@ -160,12 +159,12 @@ class FirebaseDatabase
     * Deletando dados onde destinatario = 5
     *
     */
-//     $deleted = $firebase->deleteWithFilter("conversas", "destinatario", 5);
-//     if ($deleted) {
-//         echo "Dados deletados com sucesso!" . PHP_EOL;
-//     } else {
-//         echo "Nenhum dado encontrado para deletar." . PHP_EOL;
-//     }
+    //     $deleted = $firebase->deleteWithFilter("conversas", "destinatario", 5);
+    //     if ($deleted) {
+    //         echo "Dados deletados com sucesso!" . PHP_EOL;
+    //     } else {
+    //         echo "Nenhum dado encontrado para deletar." . PHP_EOL;
+    //     }
 // } catch (Exception $e) {
 //     echo 'Erro ao conectar no Firebase: ' . $e->getMessage();
 // }
