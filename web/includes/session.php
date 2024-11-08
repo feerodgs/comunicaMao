@@ -1,3 +1,3 @@
 <?php
-
-    session_start();
+session_name("comunicamao");
+session_start();
