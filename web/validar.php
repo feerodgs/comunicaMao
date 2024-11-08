@@ -1,58 +1,50 @@
 <?php
 
-error_reporting(0);
-ini_set("display_errors", 0);
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
 
-include "includes/conexao.php";
+require "class/FirebaseDatabase.php";
 include "includes/session.php";
 
-$senha = $_POST['senha'];
-$usuario = $_POST['usuario'];
+
 
 if (isset($_POST['senha']) and isset($_POST['usuario'])) {
 
-    $senhaMD5 = md5($senha);
+    $senha = $_POST['senha'];
+    $usuario = $_POST['usuario'];
 
-    $query = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND senha = '$senhaMD5'";
-    $result = mysqli_query($conect, $query);
-    $dados = mysqli_fetch_array($result);
-    $num_result = mysqli_num_rows($result);
+    $firebase = new FirebaseDatabase(
+        __DIR__ . "/db/firebase-credentials.json",
+        "https://comunicamao-a541b-default-rtdb.firebaseio.com/"
+    );
 
-    if ($num_result > 0) {
+    $response = $firebase->login($usuario, $senha);
 
-        if ($dados['tipo'] == "m") {
+    if (isset($response['error'])) {
+?>
+        <form name="erro" id="erro" method="post" action="login.php">
+            <input type="hidden" name="mensagem" id="mensagem" value="<?php print $response['error']; ?>">
+        </form>
 
-            $_SESSION['usuario']        = $dados['usuario'];
-            $_SESSION['tipo']           = $dados['tipo'];
-            $_SESSION['id_usuario']     = $dados['id_usuario'];
-            $_SESSION['logado']         = "s";
-
-            header("Location: medico/index.php");
-            exit();
-        } else if ($dados['tipo'] == "p") {
-
-            $_SESSION['usuario']        = $dados['usuario'];
-            $_SESSION['tipo']           = $dados['tipo'];
-            $_SESSION['id_usuario']     = $dados['id_usuario'];
-            $_SESSION['logado']         = "s";
-            header("Location: cliente/index.php");
-            exit();
-        } else {
-            $mensagem = "Erro no login ! Favor contate o administrador do sistema.";
-        }
+        <script>
+            document.erro.submit();
+        </script>
+<?php
+        exit();
+        // echo "Erro: " . $response['error'] . PHP_EOL;
     } else {
-        $mensagem = "Erro ao login ! Usuario ou senha incorreto.";
+        // echo "Login realizado com sucesso! ID do usu�rio: " . $response['userId'] . PHP_EOL;
+        // echo "Token de autentica��o: " . $response['idToken'] . PHP_EOL;
+
+        $dados = $firebase->selectByUid("usuarios", $response['userId']);
+        // print_r($dados);
+
+        $_SESSION['usuario']        = $dados['usuario'];
+        $_SESSION['tipo']           = $dados['tipo'];
+        $_SESSION['id_usuario']     = $dados['id_usuario'];
+        $_SESSION['logado']         = "s";
+        session_write_close();
+        header("Location: medico/index.php");
+        exit();
     }
 }
-
-
-if ($mensagem != "") { ?>
-
-    <form name="erro" id="erro" method="post" action="login.php">
-        <input type="hidden" name="mensagem" id="mensagem" value="<?php print $mensagem; ?>">
-    </form>
-
-    <script>
-        document.erro.submit();
-    </script>
-<?php } ?>
