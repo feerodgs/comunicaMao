@@ -3,10 +3,15 @@
 require 'vendor/autoload.php';
 
 use Kreait\Firebase\Factory;
+use Kreait\Firebase\Auth;
+use Kreait\Firebase\Exception\Auth\InvalidPassword;
+use Kreait\Firebase\Exception\Auth\UserNotFound;
+
 
 class FirebaseDatabase
 {
     private $database;
+    private $auth;
 
     public function __construct($serviceAccountPath, $databaseUri)
     {
@@ -15,12 +20,13 @@ class FirebaseDatabase
             ->withDatabaseUri($databaseUri);
 
         $this->database = $firebase->createDatabase();
+        $this->auth = $firebase->createAuth();
     }
 
     public function insert($path, $data)
     {
         $newEntry = $this->database->getReference($path)->push($data);
-        return $newEntry->getKey(); // Retorna o ID gerado
+        return $newEntry->getKey();
     }
 
     public function update($path, $data)
@@ -40,19 +46,22 @@ class FirebaseDatabase
         return $this->database->getReference($path)->getValue();
     }
 
-    // Novo m�todo para buscar registros com filtros (ex: remetente ou destinatario)
+    public function selectByUid($path, $uid)
+    {
+        $results = $this->database->getReference("$path/$uid")->getValue();
+        return $results;
+    }
+
     public function selectWithFilter($path, $field, $value)
     {
         $results = $this->database->getReference($path)
             ->orderByChild($field)
-
             ->equalTo($value, $field)
             ->getValue();
 
         return $results;
     }
 
-    // M�todo para buscar registros com remetente ou destinatario igual ao valor
     public function selectByRemetenteOuDestinatario($path, $userId)
     {
         $remetenteResults = $this->database->getReference($path)
@@ -65,13 +74,11 @@ class FirebaseDatabase
             ->equalTo($userId)
             ->getValue();
 
-        // Combina os dois resultados
         $allResults = array_merge_recursive((array)$remetenteResults, (array)$destinatarioResults);
 
         return $allResults;
     }
 
-    // Novo m�todo para atualizar registros com base em um filtro (campo e valor)
     public function updateWithFilter($path, $field, $value, $data)
     {
         $results = $this->database->getReference($path)
@@ -79,19 +86,16 @@ class FirebaseDatabase
             ->equalTo($value)
             ->getValue();
 
-        // Se algum registro for encontrado, atualiza os dados
         if ($results) {
             foreach ($results as $key => $record) {
-                // Atualiza cada registro encontrado com o novo dado
                 $this->database->getReference("$path/$key")->update($data);
             }
             return true;
         }
 
-        return false; // Caso n�o tenha encontrado nenhum registro
+        return false;
     }
 
-    // Novo m�todo para excluir registros com base em um filtro (campo e valor)
     public function deleteWithFilter($path, $field, $value)
     {
         $results = $this->database->getReference($path)
@@ -99,16 +103,47 @@ class FirebaseDatabase
             ->equalTo($value)
             ->getValue();
 
-        // Se algum registro for encontrado, deleta os dados
         if ($results) {
             foreach ($results as $key => $record) {
-                // Deleta cada registro encontrado
+
                 $this->database->getReference("$path/$key")->remove();
             }
             return true;
         }
 
-        return false; // Caso n�o tenha encontrado nenhum registro
+        return false;
+    }
+
+    public function login($email, $password)
+    {
+        try {
+            $signInResult = $this->auth->signInWithEmailAndPassword($email, $password);
+            $userId = $signInResult->firebaseUserId();
+            $idToken = $signInResult->idToken();
+
+            return [
+                'userId' => $userId,
+                'idToken' => $idToken,
+                'message' => 'Login realizado com sucesso!'
+            ];
+        } catch (InvalidPassword $e) {
+            return [
+                'error' => 'Senha incorreta.'
+            ];
+        } catch (UserNotFound $e) {
+            return [
+                'error' => 'Usuário não encontrado.'
+            ];
+        } catch (\Exception $e) {
+            if ($e->getMessage() == "INVALID_LOGIN_CREDENTIALS") {
+                $erro = "Credenciais Inválidas";
+            } else {
+                $erro = 'Erro ao realizar o login: ' . $e->getMessage();
+            }
+            return [
+                'error' => $erro
+            ];
+        }
     }
 }
 // try {
