@@ -46,7 +46,7 @@ include "../includes/cabecalho.php";
 
         .message-right {
             text-align: right;
-            background-color: #007bff;
+            background-color: #ff8b41;
             color: #ffffff;
             margin-left: auto;
         }
@@ -95,16 +95,35 @@ include "../includes/cabecalho.php";
     </div> */ ?>
 
     <div class="container">
-        <div class="chat-box">
-           
-            <div class="chat-messages">
-                
-            </div>
+        <div class="row">
+            <div class="col-md-9">
+                <div class="chat-box">
 
-           
-            <div class="chat-footer">
-                <input type="text" class="form-control" id="messageInput" placeholder="Digite sua mensagem">
-                <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+                    <div class="chat-messages">
+
+                    </div>
+
+
+                    <div class="chat-footer">
+                        <input type="text" class="form-control" id="messageInput" placeholder="Digite sua mensagem">
+                        <button class="btn text-white" style="background-color:#ff8b41; " onclick="sendMessage()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-3">
+                <div class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0">
+                        <div class="col-md-4 d-flex justify-content-center align-items-center" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px; background-color:#ff8b41;">
+                            <i class="fa-solid fa-user-injured fs-1 text-white"></i>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <label class="form-label">Paciente</label>
+                                <input type="number" name="destinatario" id="destinatario" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -117,12 +136,12 @@ include "../includes/cabecalho.php";
 
     <form name="dados" id="dados">
         <input type="hidden" name="medico" id="medico" value="<?php print $_SESSION['id_usuario'] ?>">
+        <input type="hidden" name="uuid" id="uuid" value="">
     </form>
 
 
     <script>
         function buscar() {
-            
             var acao = "atender";
             var medico = $('#medico').val();
 
@@ -130,34 +149,71 @@ include "../includes/cabecalho.php";
                 type: "POST",
                 url: "../listener.php",
                 data: 'acao=' + acao +
-                    '&medico=' + medico,
+                    '&medico=' + medico +
+                    '&id_conversa=' + $('#mensagens').val(),
                 dataType: "html",
                 success: function(response) {
+                    // Divida a resposta por '|' para separar as mensagens
+                    var mensagens = response.split("|");
 
-                    var resposta = response.split("&");
-                    
-                    const mensagem = resposta[3];
-                    const horario = resposta[4];
+                    var mensagemMaisRecente = null;
+                    var maiorTimestamp = null;
+                    var mensagemKey = null;
 
-                    const messageText = mensagem.replace("Mensagem=","");
-                    const messageHorario = horario.replace("Timestamp=", "");
+                    // Itere sobre cada mensagem no array de mensagens
+                    mensagens.forEach(function(mensagem) {
+                        // Divida a mensagem em pares chave-valor usando '&'
+                        var campos = mensagem.split("&");
+                        var mensagemObj = {};
 
-                    if (messageText) {
+                        // Preencha o objeto com as informações da mensagem
+                        campos.forEach(function(campo) {
+                            var chaveValor = campo.split("=");
+                            mensagemObj[chaveValor[0]] = chaveValor[1];
+                        });
+                        //console.log(mensagemObj);
+                        // Verifique se a mensagem tem os campos 'Mensagem' e 'Timestamp'
+                        if (mensagemObj.Mensagem && mensagemObj.Timestamp) {
+                            // Converta o Timestamp para o formato Date
+                            var timestampDate = mensagemObj.Timestamp;
+
+                            // Compare o Timestamp com o maior encontrado até agora
+                            if (!maiorTimestamp || timestampDate > maiorTimestamp) {
+                                maiorTimestamp = timestampDate;
+                                mensagemMaisRecente = mensagemObj.Mensagem;
+                                mensagemKey = mensagemObj.key;
+                            }
+                        }
+                    });
+
+                    // Exiba a mensagem mais recente
+                    if (mensagemMaisRecente) {
+                        console.log("Mensagem mais recente:", mensagemMaisRecente);
+                    } else {
+                        console.log("Nenhuma mensagem encontrada.");
+                    }
+
+
+
+                    const messageText = mensagemMaisRecente;
+                    const messageHorario = maiorTimestamp;
+
+                    if (messageText && $('#uuid').val() != mensagemKey) {
                         const chatMessages = document.querySelector('.chat-messages');
                         const messageElement = document.createElement('div');
+
                         messageElement.classList.add('message', 'message-left');
 
                         messageElement.innerHTML = `
-                <span class="username">Paciente:</span>
-                <p class="text mb-0">${messageText}</p>
-                <p class="fst-italic" style="font-size: 0.8rem">${messageHorario}</p>
-            `;
+                        <span class="username">Paciente:</span>
+                        <p class="text mb-0">${messageText}</p>
+                        <p class="fst-italic" style="font-size: 0.8rem">${messageHorario}</p>
+                    `;
 
                         chatMessages.appendChild(messageElement);
                         chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll para a última mensagem
-                        messageInput.value = '';
+                        $('#uuid').val(mensagemKey);
                     }
-
                 },
                 error: function(xhr, status, error) {
                     console.error('Erro:', error);
@@ -165,6 +221,7 @@ include "../includes/cabecalho.php";
                 }
             });
         }
+
 
         buscar();
         setInterval(buscar, 5000);
@@ -196,14 +253,52 @@ include "../includes/cabecalho.php";
             const messageText = messageInput.value.trim();
 
             if (messageText) {
+
                 const chatMessages = document.querySelector('.chat-messages');
                 const messageElement = document.createElement('div');
+                const now = new Date();
+
+                var d = new Date();
+                var strDate = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
                 messageElement.classList.add('message', 'message-right');
 
                 messageElement.innerHTML = `
                 <span class="username">Você:</span>
-                <p class="text">${messageText}</p>
+                <p class="text  mb-0">${messageText}</p>
+                <p class="fst-italic" style="font-size: 0.8rem">${strDate}</p>
             `;
+                const medico = $('#medico').val();
+                const acao = "inserir";
+                const destinatario = $('#destinatario').val();
+                const mensagem = messageText;
+
+
+                if (destinatario == "") {
+                    Swal.fire("", "Favor preencher o campo do Paciente", "warning");
+                    $("#destinatario").focus();
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "../insert.php",
+                    data: 'acao=' + acao +
+                        '&medico=' + medico +
+                        '&destinatario=' + destinatario +
+                        '&mensagem=' + mensagem,
+                    dataType: "html",
+                    success: function(response) {
+
+                        if (response != "succes") {
+                            Swal.fire("", "Erro ao enviar mensagem ! Tente novamente.", "warning");
+                        }
+
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro:', error);
+                        Swal.fire("", "Ops! Algo deu errado no processo.", "error");
+                    }
+                });
 
                 chatMessages.appendChild(messageElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll para a última mensagem
