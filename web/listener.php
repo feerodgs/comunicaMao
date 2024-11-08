@@ -3,26 +3,44 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+date_default_timezone_set('America/Sao_Paulo');
+header('Content-Type: application/json;');
 
-
-require 'vendor/autoload.php';
-
-use Kreait\Firebase\Factory;
-
-set_time_limit(0); // Impede que o script expire
+require 'class/FirebaseDatabase.php';
+set_time_limit(0);
 $destinatario = $_POST['medico'];
-// Inicializar a fábrica do Firebase
-$firebase = (new Factory)
-    ->withServiceAccount(__DIR__ . "/db/firebase-credentials.json")
-    ->withDatabaseUri("https://comunicamao-a541b-default-rtdb.firebaseio.com/");
-
-// Acessar o banco de dados Realtime Database
-$database = $firebase->createDatabase();
-
-// Caminho da referência que será monitorada
 $referencePath = 'conversas';
+$lastTimestamp = 0;
 
-// Variável para armazenar o último timestamp processado
+try {
+    $firebase = new FirebaseDatabase(
+        "db/firebase-credentials.json",
+        "https://comunicamao-a541b-default-rtdb.firebaseio.com/"
+    );
+
+    // $dadosRemetente = $firebase->selectWithFilter($referencePath, "destinatario", intval($destinatario));
+    $dadosRemetente = $firebase->selectWithFilter($referencePath, "destinatario", intval($destinatario));
+
+    foreach ($dadosRemetente as $key => $record) {
+        if (isset($record['horario'])) {
+
+            if ($record['horario'] > $lastTimestamp) {
+                $lastTimestamp = $record['horario'];
+                $dataFormatada = date('d/m/Y H:i:s', $lastTimestamp);
+            }
+
+            if ($destinatario == $record['destinatario']) {
+                echo "key={$key}&Destinatario={$record['destinatario']}&Remetente={$record['remetente']}&Mensagem={$record['mensagem']}&Timestamp={$dataFormatada}|";
+                // exit();
+
+            }
+        }
+    }
+} catch (Exception $e) {
+    echo 'Erro ao conectar no Firebase: ' . $e->getMessage();
+}
+
+/*
 $lastTimestamp = 0;
 if ($_POST['acao'] == "atender") {
     try {
@@ -62,3 +80,4 @@ if ($_POST['acao'] == "atender") {
         sleep(10);
     }
 }
+*/
