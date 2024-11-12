@@ -113,7 +113,7 @@ include "../includes/cabecalho.php";
             <div class="col-md-3 mt-3">
                 <div class="card mb-3" style="max-width: 540px;">
                     <div class="row g-0">
-                        <div class="col-md-4 d-flex justify-content-center align-items-center" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px; background-color:#ff8b41;">
+                        <div class="col-md-4 d-flex justify-content-center align-items-center p-3" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px; background-color:#ff8b41;">
                             <i class="fa-solid fa-user-injured fs-1 text-white"></i>
                         </div>
                         <div class="col-md-8">
@@ -124,6 +124,24 @@ include "../includes/cabecalho.php";
                         </div>
                     </div>
                 </div>
+                <br>
+                <div class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0">
+                        <div class="col-md-4 d-flex justify-content-center align-items-center p-3" style="border-bottom-left-radius: 5px; border-top-left-radius: 5px; background-color:#ff8b41;">
+                            <i class="fa-solid fa-user-doctor fs-1 text-white"></i>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                
+                                <label class="form-label">Código do Médico</label>
+                                <br>
+                                <div class="text-center">
+                                <span class="text-center fs-3 fw-bolder" style="color: #ff8b41;"><?php print $_SESSION['id_usuario']?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
             </div>
         </div>
     </div>
@@ -153,31 +171,30 @@ include "../includes/cabecalho.php";
                     '&id_conversa=' + $('#mensagens').val(),
                 dataType: "html",
                 success: function(response) {
-                    // Divida a resposta por '|' para separar as mensagens
+                    
                     var mensagens = response.split("|");
 
                     var mensagemMaisRecente = null;
                     var maiorTimestamp = null;
                     var mensagemKey = null;
 
-                    // Itere sobre cada mensagem no array de mensagens
+                    
                     mensagens.forEach(function(mensagem) {
-                        // Divida a mensagem em pares chave-valor usando '&'
+                        
                         var campos = mensagem.split("&");
                         var mensagemObj = {};
 
-                        // Preencha o objeto com as informações da mensagem
+                        
                         campos.forEach(function(campo) {
                             var chaveValor = campo.split("=");
                             mensagemObj[chaveValor[0]] = chaveValor[1];
                         });
-                        //console.log(mensagemObj);
-                        // Verifique se a mensagem tem os campos 'Mensagem' e 'Timestamp'
+                        
                         if (mensagemObj.Mensagem && mensagemObj.Timestamp) {
-                            // Converta o Timestamp para o formato Date
+
                             var timestampDate = mensagemObj.Timestamp;
 
-                            // Compare o Timestamp com o maior encontrado até agora
+
                             if (!maiorTimestamp || timestampDate > maiorTimestamp) {
                                 maiorTimestamp = timestampDate;
                                 mensagemMaisRecente = mensagemObj.Mensagem;
@@ -186,14 +203,11 @@ include "../includes/cabecalho.php";
                         }
                     });
 
-                    // Exiba a mensagem mais recente
                     if (mensagemMaisRecente) {
                         console.log("Mensagem mais recente:", mensagemMaisRecente);
                     } else {
                         console.log("Nenhuma mensagem encontrada.");
                     }
-
-
 
                     const messageText = mensagemMaisRecente;
                     const messageHorario = maiorTimestamp;
@@ -301,7 +315,7 @@ include "../includes/cabecalho.php";
                 });
 
                 chatMessages.appendChild(messageElement);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll para a última mensagem
+                chatMessages.scrollTop = chatMessages.scrollHeight;
                 messageInput.value = '';
             }
         }
