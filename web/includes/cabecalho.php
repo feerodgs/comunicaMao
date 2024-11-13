@@ -1,6 +1,6 @@
 <?php
 
-include "../includes/conexao.php";
+// include "../includes/conexao.php";
 include "../includes/session.php";
 
 ?>
@@ -18,7 +18,7 @@ include "../includes/session.php";
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa-solid fa-user"></i> <?php print ucfirst($_SESSION['usuario']);?>
+                        <i class="fa-solid fa-user"></i> <?php print ucfirst($_SESSION['usuario']); ?>
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="../includes/encerrar.php">Desconectar</a></li>
