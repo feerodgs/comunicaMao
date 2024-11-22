@@ -19,7 +19,7 @@ try {
     );
 
     // $dadosRemetente = $firebase->selectWithFilter($referencePath, "destinatario", intval($destinatario));
-    $dadosRemetente = $firebase->selectWithFilter($referencePath, "destinatario", intval($destinatario));
+    $dadosRemetente = $firebase->selectWithFilter($referencePath, "destinatario", $destinatario);
 
     foreach ($dadosRemetente as $key => $record) {
         if (isset($record['horario'])) {

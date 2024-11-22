@@ -29,8 +29,8 @@ if ($acao == "inserir") {
             ->getReference('conversas')
             ->push([
                 'mensagem' => $mensagem,
-                'destinatario' => intval($destinatario),
-                'remetente' => intval($medico),
+                'destinatario' => $destinatario,
+                'remetente' => $medico,
                 'horario' => time()
             ]);
 
