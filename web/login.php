@@ -9,6 +9,9 @@ ini_set("display_errors", 0);
 <html lang="en">
 
 <head>
+    <meta name="theme-color" content="#f9f9f9">
+    <link rel="manifest" href="manifest.json">
+    <link rel="canonical" href="https://uricer.edu.br/aproffapes/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
@@ -20,7 +23,20 @@ ini_set("display_errors", 0);
         }
     </style>
 </head>
+<script>
 
+if('serviceWorker' in navigator){
+            navigator.serviceWorker.register('sw.js')
+                .then(function (){
+                    console.log('Service Worker Registered');
+                })
+                .catch(function (){
+                    console.warn('Service Worker Failed');
+                });
+        }
+    
+
+</script>
 <body>
     <div class="gradient-custom position-fixed w-100 h-100"></div>
     <section class="vh-100 w-100">
