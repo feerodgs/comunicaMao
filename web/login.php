@@ -24,19 +24,17 @@ ini_set("display_errors", 0);
     </style>
 </head>
 <script>
-
-if('serviceWorker' in navigator){
-            navigator.serviceWorker.register('sw.js')
-                .then(function (){
-                    console.log('Service Worker Registered');
-                })
-                .catch(function (){
-                    console.warn('Service Worker Failed');
-                });
-        }
-    
-
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(function() {
+                console.log('Service Worker Registered');
+            })
+            .catch(function() {
+                console.warn('Service Worker Failed');
+            });
+    }
 </script>
+
 <body>
     <div class="gradient-custom position-fixed w-100 h-100"></div>
     <section class="vh-100 w-100">
@@ -46,10 +44,10 @@ if('serviceWorker' in navigator){
                     <div class="card bg-dark text" style="border-radius: 1rem;">
                         <div class="card-body p-5 text-center">
                             <form name="login" id="login" method="post" action="validar.php">
-                                <div class="mb-md-5 mt-md-4 pb-5">
+                                <div class="mb-md-5 mt-md-4">
                                     <img src="img/logo.png" style="width: 185px;" alt="logo">
                                     <h2 class="fw-bold mb-2 text-uppercase text-white">Login</h2>
-                                    <p class="text-white-50 mb-5">Acesse com seu Usuário e Senha !</p>
+                                    <p class="text-white-50 mb-5">Acesse com seu E-mail e Senha !</p>
                                     <?php
                                     if ($_POST['mensagem'] != "") { ?>
                                         <div class="alert alert-danger" role="alert">
@@ -58,10 +56,10 @@ if('serviceWorker' in navigator){
                                     <?php } ?>
                                     <div data-mdb-input-init class="form-outline form-white mb-4">
                                         <div class="form-floating mb-3">
-                                            <input type="text" id="usuario" class="form-control" name="usuario" placeholder="Usuário" onkeypress="removeUsuario();">
-                                            <label for="usuario">Usuário</label>
+                                            <input type="mail" id="usuario" class="form-control" name="usuario" placeholder="Usuário" onkeypress="removeUsuario();">
+                                            <label for="usuario">E-mail</label>
                                             <div class="invalid-feedback hide text-start" id="aviso-usuario">
-                                                <b>Favor preencher o usuário.</b>
+                                                <b>Favor preencher o E-mail.</b>
                                             </div>
                                         </div>
 
@@ -78,6 +76,11 @@ if('serviceWorker' in navigator){
                                     </div>
 
                                     <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="button" onclick="logar();">Login</button>
+
+                                    <div class="mt-5">
+                                        <p class="mb-2 me-2 text-white">Ainda não tem conta ?</p>
+                                        <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" onclick="cadastrar()">Cadastrar-se</button>
+                                    </div>
                             </form>
                         </div>
                     </div>
@@ -88,6 +91,11 @@ if('serviceWorker' in navigator){
     </section>
 
     <script>
+        function cadastrar() {
+            window.location.href = "cadastro.php";
+        }
+
+
         function logar() {
 
             var usuario = document.login.usuario.value;
