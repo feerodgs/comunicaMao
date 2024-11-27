@@ -1,0 +1,40 @@
+name: comunicamao
+description: "A new Flutter project."
+
+# Prevents accidental publication to pub.dev
+publish_to: 'none'
+
+# Versioning
+version: 1.0.0+1
+
+# Dart SDK version
+environment:
+  sdk: ^3.5.0
+
+# Dependencies
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.32.0
+  firebase_database: ^10.0.9
+  cupertino_icons: ^1.0.8
+  intl: ^0.18.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  # Enables Material Design icons
+  uses-material-design: true
+
+  # Uncomment and add assets if needed
+  # assets:
+  #   - images/
+  
+  # Uncomment and define custom fonts if needed
+  # fonts:
+  #   - family: CustomFont
+  #     fonts:
+  #       - asset: fonts/CustomFont-Regular.ttf
