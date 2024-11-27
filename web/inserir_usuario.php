@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require 'vendor/autoload.php';
+require 'class/FirebaseDatabase.php';
 
 use Kreait\Firebase\Factory;
 
@@ -16,14 +17,15 @@ $factory = (new Factory)
 $auth = $factory->createAuth();
 $database = $factory->createDatabase();
 
-function criarUsuario($email, $password, $dadosAdicionais = []) {
+function criarUsuario($email, $password, $dadosAdicionais = [])
+{
     global $auth, $database;
 
     try {
-        
+
         $usuario = $auth->createUserWithEmailAndPassword($email, $password);
         $uid = $usuario->uid;
-        
+
         $auth->sendEmailVerificationLink($email);
 
         $userData = array_merge(['email' => $email], $dadosAdicionais);
@@ -37,12 +39,26 @@ function criarUsuario($email, $password, $dadosAdicionais = []) {
     }
 }
 
+$firebase = new FirebaseDatabase(
+    __DIR__ . "/db/firebase-credentials.json",
+    "https://comunicamao-a541b-default-rtdb.firebaseio.com/"
+);
+
+$max_id = $firebase->buscarUsuarioComMaiorId();
+
+if ($max_id == "su") {
+    $new_id = 1;
+} else {
+    $new_id = intval($max_id['id_usuario']) + 1;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' and $_POST['acao'] == "cadastrar") {
 
 
     $email = $_POST['email'];
     $password = $_POST['senha'];
     $nome = $_POST['nome'];
+    $tipo = $_POST['tipo'];
 
-    criarUsuario($email, $password, ['usuario' => $nome, 'tipo' => "p"]);
+    criarUsuario($email, $password, ['usuario' => $nome, 'tipo' => $tipo, 'id_usuario' => $new_id]);
 }

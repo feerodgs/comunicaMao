@@ -76,11 +76,6 @@ ini_set("display_errors", 0);
                                     </div>
 
                                     <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="button" onclick="logar();">Login</button>
-
-                                    <div class="mt-5">
-                                        <p class="mb-2 me-2 text-white">Ainda não tem conta ?</p>
-                                        <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" onclick="cadastrar()">Cadastrar-se</button>
-                                    </div>
                             </form>
                         </div>
                     </div>
@@ -91,11 +86,6 @@ ini_set("display_errors", 0);
     </section>
 
     <script>
-        function cadastrar() {
-            window.location.href = "cadastro.php";
-        }
-
-
         function logar() {
 
             var usuario = document.login.usuario.value;

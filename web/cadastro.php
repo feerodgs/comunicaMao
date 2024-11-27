@@ -2,7 +2,9 @@
 
 error_reporting(0);
 ini_set("display_errors", 0);
-
+if ($_POST['tipo'] != "") {
+    $tipo = $_POST['tipo'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -30,12 +32,13 @@ ini_set("display_errors", 0);
                 <div class="col-12 col-md-8 col-lg-6 col-xl-5">
                     <div class="card bg-dark text" style="border-radius: 1rem;">
                         <div class="card-body p-5 text-center">
-                            <form name="login" id="login" method="post" action="inserir_usuario.php">
+                            <form name="login" id="login">
                                 <input type="hidden" name="acao" id="acao" value="cadastrar">
+                                <input type="hidden" name="tipo" id="tipo" value="<?php print $tipo;?>">
                                 <div class="mb-md-5 mt-md-4">
                                     <img src="img/logo.png" style="width: 185px;" alt="logo">
                                     <h2 class="fw-bold mb-2 text-uppercase text-white">Cadastro</h2>
-                                    <p class="text-white-50 mb-5">Crie aqui sua conta !</p>
+                                    <p class="text-white-50 mb-5">Criação de Usuários</p>
                                     <?php
                                     if ($_POST['mensagem'] != "") { ?>
                                         <div class="alert alert-danger" role="alert">
@@ -82,9 +85,7 @@ ini_set("display_errors", 0);
                                             </div>
                                         </div>
                                     </div>
-
-
-                                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="button" onclick="validar();">Cadastrar-se</button>
+                                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="button" onclick="validar();">Cadastrar</button>
                             </form>
                         </div>
                     </div>
@@ -159,6 +160,7 @@ ini_set("display_errors", 0);
             var senha = document.login.senha.value;
             var senhaConfirmada = document.login.senhaConfirmada.value;
             var acao = document.login.acao.value;
+            var tipo = document.login.tipo.value;
 
             $.ajax({
                 type: "POST",
@@ -166,15 +168,25 @@ ini_set("display_errors", 0);
                 data: 'acao=' + acao +
                     '&nome=' + nome +
                     '&senha=' + senha +
-                    '&email=' + usuario,
+                    '&email=' + usuario +
+                    '&tipo=' + tipo,
                 dataType: "html",
                 success: function(response) {
+                    console.log(response.substr(0, 4));
+                    if (response.substr(0, 4) == "Erro") {
+                        var icon = "warning";
+                    } else {
+                        var icon = "success";
+                    }
+
                     Swal.fire({
                         title: "",
                         text: response,
-                        icon: "success"
+                        icon: icon
                     }).then(function() {
-                        window.location = "index.php";
+                        if (icon == "success") {
+                            window.location = "cadastrar_usuario.php";
+                        }
                     });
                 }
             })
