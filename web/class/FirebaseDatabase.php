@@ -121,7 +121,7 @@ class FirebaseDatabase
             $userId = $signInResult->firebaseUserId();
             $idToken = $signInResult->idToken();
 
-            $user = $this->auth->getUserByEmail('eduardo@uricer.edu.br');
+            $user = $this->auth->getUserByEmail($email);
 
             if (!$user->emailVerified) {
                 return [
