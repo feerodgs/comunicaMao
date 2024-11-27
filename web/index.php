@@ -1,1 +1,1 @@
-<?php include "login.php"?>
+<?php include "cadastrar_usuario.php"?>

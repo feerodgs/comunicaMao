@@ -9,6 +9,9 @@ ini_set("display_errors", 0);
 <html lang="en">
 
 <head>
+    <meta name="theme-color" content="#f9f9f9">
+    <link rel="manifest" href="manifest.json">
+    <link rel="canonical" href="https://uricer.edu.br/aproffapes/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
@@ -20,6 +23,17 @@ ini_set("display_errors", 0);
         }
     </style>
 </head>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(function() {
+                console.log('Service Worker Registered');
+            })
+            .catch(function() {
+                console.warn('Service Worker Failed');
+            });
+    }
+</script>
 
 <body>
     <div class="gradient-custom position-fixed w-100 h-100"></div>
@@ -30,10 +44,10 @@ ini_set("display_errors", 0);
                     <div class="card bg-dark text" style="border-radius: 1rem;">
                         <div class="card-body p-5 text-center">
                             <form name="login" id="login" method="post" action="validar.php">
-                                <div class="mb-md-5 mt-md-4 pb-5">
+                                <div class="mb-md-5 mt-md-4">
                                     <img src="img/logo.png" style="width: 185px;" alt="logo">
                                     <h2 class="fw-bold mb-2 text-uppercase text-white">Login</h2>
-                                    <p class="text-white-50 mb-5">Acesse com seu Usuário e Senha !</p>
+                                    <p class="text-white-50 mb-5">Acesse com seu E-mail e Senha !</p>
                                     <?php
                                     if ($_POST['mensagem'] != "") { ?>
                                         <div class="alert alert-danger" role="alert">
@@ -42,10 +56,10 @@ ini_set("display_errors", 0);
                                     <?php } ?>
                                     <div data-mdb-input-init class="form-outline form-white mb-4">
                                         <div class="form-floating mb-3">
-                                            <input type="text" id="usuario" class="form-control" name="usuario" placeholder="Usuário" onkeypress="removeUsuario();">
-                                            <label for="usuario">Usuário</label>
+                                            <input type="mail" id="usuario" class="form-control" name="usuario" placeholder="Usuário" onkeypress="removeUsuario();">
+                                            <label for="usuario">E-mail</label>
                                             <div class="invalid-feedback hide text-start" id="aviso-usuario">
-                                                <b>Favor preencher o usuário.</b>
+                                                <b>Favor preencher o E-mail.</b>
                                             </div>
                                         </div>
 

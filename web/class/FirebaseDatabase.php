@@ -121,6 +121,14 @@ class FirebaseDatabase
             $userId = $signInResult->firebaseUserId();
             $idToken = $signInResult->idToken();
 
+            $user = $this->auth->getUserByEmail($email);
+
+            if (!$user->emailVerified) {
+                return [
+                    'error' => 'E-mail não autenticado.'
+                ];
+            }
+
             return [
                 'userId' => $userId,
                 'idToken' => $idToken,
@@ -143,6 +151,31 @@ class FirebaseDatabase
             return [
                 'error' => $erro
             ];
+        }
+    }
+
+    public function buscarUsuarioComMaiorId()
+    {
+
+        try {
+            // Referência ao nó de usuários no Realtime Database
+            $ref = $this->database->getReference('usuarios');
+
+            // Ordenar os usuários pelo campo 'id_usuario' e pegar o último item
+            $snapshot = $ref->orderByChild('id_usuario')->limitToLast(1)->getSnapshot();
+
+            // Obter os dados do usuário
+            $usuarios = $snapshot->getValue();
+
+            if (!empty($usuarios)) {
+                // Como limitToLast retorna uma lista, pegamos o primeiro registro
+                $usuario = array_values($usuarios)[0];
+                return $usuario;
+            } else {
+                return "su";//Sem Usuarios
+            }
+        } catch (\Kreait\Firebase\Exception\DatabaseException $e) {
+            echo 'Erro ao acessar o Realtime Database: ' . $e->getMessage();
         }
     }
 }
