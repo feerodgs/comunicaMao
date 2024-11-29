@@ -1,7 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController messageController = TextEditingController();
+  String? destinatario;
+
+  late DatabaseReference databaseRef;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Obter o destinatário a partir dos argumentos da rota
+    destinatario = ModalRoute.of(context)?.settings.arguments as String?;
+
+    if (destinatario != null) {
+      databaseRef = FirebaseDatabase.instance.ref('usuarios');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

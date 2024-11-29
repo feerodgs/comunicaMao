@@ -1,10 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import '../models/message_model.dart';
 import 'package:intl/intl.dart';
+import 'package:camera/camera.dart';
+import 'package:http/http.dart' as http;
+import 'camera_screen.dart'; // Certifique-se de criar essa tela de câmera
+import 'preview_screen.dart'; // Certifique-se de criar a tela de prévia da imagem
+import '../models/message_model.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final List<CameraDescription> cameras; // Adicionado o parâmetro cameras
+
+  const ChatScreen({super.key, required this.cameras});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -14,18 +22,17 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController messageController = TextEditingController();
   final int remetente = 2; // ID do remetente (ajuste conforme necessário)
   String? destinatario;
-
   late DatabaseReference databaseRef;
+  XFile? _imageFile; // Para armazenar a imagem capturada
+
+  final String apiUrl =
+      'https://drzbdggakc.execute-api.us-east-1.amazonaws.com/get-label';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // Obter o destinatário a partir dos argumentos da rota
     destinatario = ModalRoute.of(context)?.settings.arguments as String?;
-
     if (destinatario != null) {
-      // Inicializar referência do nó `conversas`
       databaseRef = FirebaseDatabase.instance.ref('conversas');
     }
   }
@@ -45,6 +52,92 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     messageController.clear();
+  }
+
+  Future<void> _openCamera() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CameraScreen(cameras: widget.cameras),
+      ),
+    );
+
+    if (result != null && result is XFile) {
+      setState(() {
+        _imageFile = result; // Salva o arquivo de imagem tirado
+      });
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PreviewScreen(
+            imagePath: result.path,
+            onSend: _sendImageMessage,
+            onCancel: _cancelImage,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _sendImageMessage(String imagePath) async {
+    String response = await _sendImageToApi(imagePath);
+
+    setState(() {
+      // Adiciona a imagem à lista de mensagens
+      databaseRef.push().set({
+        'destinatario': destinatario,
+        'remetente': remetente.toString(),
+        'mensagem': response,
+        'horario': DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      });
+      _imageFile = null;
+    });
+
+    Navigator.pop(context);
+  }
+
+  Future<String> _sendImageToApi(String imagePath) async {
+    try {
+      // Ler os bytes da imagem e codificar em Base64
+      final bytes = await File(imagePath).readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      // Fazer a requisição POST para a API
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'image_data': base64Image}),
+      );
+
+      print(response.body);
+
+      // Verificar se a resposta foi bem-sucedida
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        String firstLabel = 'Label não encontrado';
+
+        // Verificar se a resposta contém a chave 'Detected custom labels' (Lista de labels)
+        if (responseData.containsKey('Detected custom labels')) {
+          final customLabels = responseData['Detected custom labels'];
+          if (customLabels is List && customLabels.isNotEmpty) {
+            firstLabel = customLabels[0]['Label'] ?? 'Label não encontrado';
+          }
+        }
+        // Verificar se a resposta é um objeto único de label
+        else if (responseData.containsKey('Label')) {
+          firstLabel = responseData['Label'] ?? 'Label não encontrado';
+        }
+
+        return firstLabel; // Retorna o primeiro label encontrado
+      } else {
+        print("Falha ao enviar a imagem. Código: ${response.statusCode}");
+        return 'Erro ao processar a imagem na API.';
+      }
+    } catch (e) {
+      print("Erro ao enviar imagem para a API: $e");
+      return 'Erro ao enviar imagem.';
+    }
   }
 
   @override
@@ -102,8 +195,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                   if (messages.isEmpty) {
                     return const Center(
-                      child: Text('Nenhuma mensagem encontrada.'),
-                    );
+                        child: Text('Nenhuma mensagem encontrada.'));
                   }
 
                   return ListView.builder(
@@ -145,10 +237,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                message.mensagem,
-                                style: const TextStyle(fontSize: 16),
-                              ),
+                              message.mensagem.isNotEmpty
+                                  ? Text(
+                                      message.mensagem,
+                                      style: const TextStyle(fontSize: 16),
+                                    )
+                                  : Image.file(File(message.mensagem),
+                                      width: 150, height: 150),
                               const SizedBox(height: 4),
                               Text(
                                 horarioFormatado,
@@ -172,6 +267,10 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
+                IconButton(
+                  icon: const Icon(Icons.camera_alt),
+                  onPressed: _openCamera, // Abre a câmera ao pressionar
+                ),
                 Expanded(
                   child: TextField(
                     controller: messageController,
@@ -181,9 +280,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 16,
-                      ),
+                          vertical: 10, horizontal: 16),
                     ),
                   ),
                 ),
@@ -201,5 +298,12 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  void _cancelImage() {
+    setState(() {
+      _imageFile = null;
+    });
+    Navigator.pop(context);
   }
 }
