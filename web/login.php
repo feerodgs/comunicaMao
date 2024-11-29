@@ -86,6 +86,13 @@ ini_set("display_errors", 0);
     </section>
 
     <script>
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                logar();
+            }
+        });
+
+
         function logar() {
 
             var usuario = document.login.usuario.value;

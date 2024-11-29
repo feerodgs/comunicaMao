@@ -11,6 +11,7 @@ set_time_limit(0);
 $destinatario = $_POST['medico'];
 $referencePath = 'conversas';
 $lastTimestamp = 0;
+$paciente = $_POST['paciente'];
 
 try {
     $firebase = new FirebaseDatabase(
@@ -29,7 +30,7 @@ try {
                 $dataFormatada = date('d/m/Y H:i:s', $lastTimestamp);
             }
 
-            if ($destinatario == $record['destinatario']) {
+            if ($destinatario == $record['destinatario'] and $paciente == $record['remetente']) {
                 echo "key={$key}&Destinatario={$record['destinatario']}&Remetente={$record['remetente']}&Mensagem={$record['mensagem']}&Timestamp={$dataFormatada}|";
                 // exit();
 
