@@ -99,7 +99,7 @@ include "../includes/cabecalho.php";
             <div class="col-md-9">
                 <div class="chat-box">
 
-                    <div class="chat-messages">
+                    <div class="chat-messages" id="chat-mensagem">
 
                     </div>
 
@@ -119,7 +119,7 @@ include "../includes/cabecalho.php";
                         <div class="col-md-8">
                             <div class="card-body">
                                 <label class="form-label">Paciente</label>
-                                <input type="number" name="destinatario" id="destinatario" class="form-control">
+                                <input type="number" name="destinatario" id="destinatario" class="form-control" onkeydown="limpaChat()">
                             </div>
                         </div>
                     </div>
@@ -132,16 +132,16 @@ include "../includes/cabecalho.php";
                         </div>
                         <div class="col-md-8">
                             <div class="card-body">
-                                
+
                                 <label class="form-label">Código do Médico</label>
                                 <br>
                                 <div class="text-center">
-                                <span class="text-center fs-3 fw-bolder" style="color: #ff8b41;"><?php print $_SESSION['id_usuario']?></span>
+                                    <span class="text-center fs-3 fw-bolder" style="color: #ff8b41;"><?php print $_SESSION['id_usuario'] ?></span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>                
+                </div>
             </div>
         </div>
     </div>
@@ -159,37 +159,48 @@ include "../includes/cabecalho.php";
 
 
     <script>
+        let isBusy = false
+
+
         function buscar() {
+
+            if (isBusy || $('#destinatario').val().trim() == '') {
+                return;
+            }
+
             var acao = "atender";
             var medico = $('#medico').val();
+            var paciente = $('#destinatario').val();
 
+            isBusy = true;
             $.ajax({
                 type: "POST",
                 url: "../listener.php",
                 data: 'acao=' + acao +
                     '&medico=' + medico +
-                    '&id_conversa=' + $('#mensagens').val(),
+                    '&id_conversa=' + $('#mensagens').val() +
+                    '&paciente=' + paciente,
                 dataType: "html",
                 success: function(response) {
-                    
+
                     var mensagens = response.split("|");
 
                     var mensagemMaisRecente = null;
                     var maiorTimestamp = null;
                     var mensagemKey = null;
 
-                    
+
                     mensagens.forEach(function(mensagem) {
-                        
+
                         var campos = mensagem.split("&");
                         var mensagemObj = {};
 
-                        
+
                         campos.forEach(function(campo) {
                             var chaveValor = campo.split("=");
                             mensagemObj[chaveValor[0]] = chaveValor[1];
                         });
-                        
+
                         if (mensagemObj.Mensagem && mensagemObj.Timestamp) {
 
                             var timestampDate = mensagemObj.Timestamp;
@@ -232,13 +243,16 @@ include "../includes/cabecalho.php";
                 error: function(xhr, status, error) {
                     console.error('Erro:', error);
                     Swal.fire("", "Ops! Algo deu errado no processo.", "error");
+                },
+                complete: function() {
+                    isBusy = false;
                 }
             });
         }
 
 
-        buscar();
-        setInterval(buscar, 5000);
+
+        setInterval(buscar, 3000);
 
         function encerrar() {
             var acao = "encerrar";
@@ -265,6 +279,14 @@ include "../includes/cabecalho.php";
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const messageText = messageInput.value.trim();
+            var paciente = $('#destinatario').val();
+            var medico = $('#medico').val();
+
+            if (paciente == medico) {
+                Swal.fire("", "Você não pode enviar mensagens para você mesmo !", "warning");
+                return false;
+            }
+
 
             if (messageText) {
 
@@ -318,6 +340,14 @@ include "../includes/cabecalho.php";
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 messageInput.value = '';
             }
+        }
+
+
+        function limpaChat() {
+            console.log("entro");
+            $('#chat-mensagem').html("");
+            $('#uuid').val("");
+
         }
     </script>
 
